@@ -215,7 +215,8 @@ module Elasticsearch
 
       def skip?(actions)
         skip = actions.select { |a| a['skip'] }.first
-        if skip
+
+        if skip && skip['skip'] && skip['skip']['version']
           min, max = skip['skip']['version'].split('-').map(&:strip)
 
           min_normalized = sprintf "%03d-%03d-%03d",
