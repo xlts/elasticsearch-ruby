@@ -67,20 +67,20 @@ pipeline {
       }
     }
 
-    stage('Unit test') {
-      options { skipDefaultCheckout() }
-      steps {
-        deleteDir()
-        unstash 'source-dependencies'
-        script {
-          rubyImage() {
-            dir("${BASE_DIR}"){
-              sh 'bundle exec rake test:unit'
-            }
-          }
-        }
-      }
-    }
+    //stage('Unit test') {
+    //  options { skipDefaultCheckout() }
+    //  steps {
+    //    deleteDir()
+    //    unstash 'source-dependencies'
+    //    script {
+    //      rubyImage() {
+    //        dir("${BASE_DIR}"){
+    //          sh 'bundle exec rake test:unit'
+    //        }
+    //      }
+    //    }
+    //  }
+    //}
 
     stage('OSS integration test') {
       options { skipDefaultCheckout() }
