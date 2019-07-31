@@ -73,7 +73,7 @@ pipeline {
         deleteDir()
         unstash 'source-dependencies'
         script {
-          docker.image('ruby:2.6').inside(){
+          rubyImage() {
             dir("${BASE_DIR}"){
               sh 'bundle exec rake test:unit'
             }
