@@ -96,6 +96,10 @@ pipeline {
          script {
           rubyImage() {
             dir("${BASE_DIR}"){
+              sh '''gem update --system
+                    gem uninstall bundler
+                    gem install bundler'''
+              sh 'bundle install'
               sh(label: 'Run Rest API test rake task', script: 'bundle exec rake test:rest_api')
             }
           }
