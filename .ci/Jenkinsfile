@@ -99,6 +99,7 @@ pipeline {
               sh '''gem update --system
                     gem uninstall bundler
                     gem install bundler
+                    bundle
                     bundle exec rake bundle:clean
                     rake bundle:install'''
               sh 'bundle install'
