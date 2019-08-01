@@ -56,9 +56,9 @@ pipeline {
               sh '''gem update --system
                     gem uninstall bundler
                     gem install bundler'''
-              sh 'bundle install'
-              sh '''bundle exec rake bundle:clean
-                    rake bundle:install'''
+              sh 'bundle install --path=gems'
+              sh '''GEM_PATH=gems bundle exec rake bundle:clean
+                    GEM_PATH=gems rake bundle:install_local'''
             }
           }
         }
@@ -67,20 +67,20 @@ pipeline {
       }
     }
 
-    //stage('Unit test') {
-    //  options { skipDefaultCheckout() }
-    //  steps {
-    //    deleteDir()
-    //    unstash 'source-dependencies'
-    //    script {
-    //      rubyImage() {
-    //        dir("${BASE_DIR}"){
-    //          sh 'bundle exec rake test:unit'
-    //        }
-    //      }
-    //    }
-    //  }
-    //}
+    stage('Unit test') {
+      options { skipDefaultCheckout() }
+      steps {
+        deleteDir()
+        unstash 'source-dependencies'
+        script {
+          docker.image('ruby:2.6').inside(){
+            dir("${BASE_DIR}"){
+              sh 'GEM_PATH=gems bundle exec rake test:unit_local'
+            }
+          }
+        }
+      }
+    }
 
     stage('OSS integration test') {
       options { skipDefaultCheckout() }
@@ -96,14 +96,7 @@ pipeline {
          script {
           rubyImage() {
             dir("${BASE_DIR}"){
-              sh '''gem update --system
-                    gem uninstall bundler
-                    gem install bundler
-                    bundle
-                    bundle exec rake bundle:clean
-                    rake bundle:install'''
-              sh 'bundle install'
-              sh(label: 'Run Rest API test rake task', script: 'bundle exec rake test:rest_api')
+              sh(label: 'Run Rest API test rake task', script: 'GEM_PATH=gems bundle exec rake test:rest_api_local')
             }
           }
          }

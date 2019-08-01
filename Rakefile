@@ -80,6 +80,16 @@ namespace :bundle do
     end
   end
 
+  desc "Run `bundle install` locally in all subprojects"
+  task :install_local do
+    #sh 'mkdir gems && chmod +w gems'
+    SUBPROJECTS.each do |project|
+      puts '-' * 80
+      sh "cd #{CURRENT_PATH.join(project)} && unset BUNDLE_GEMFILE && bundle install --path=#{CURRENT_PATH.join(project)}/gems"
+      puts
+    end
+  end
+
   desc "Remove Gemfile.lock in all subprojects"
   task :clean do
     SUBPROJECTS.each do |project|
