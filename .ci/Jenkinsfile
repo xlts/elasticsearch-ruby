@@ -57,8 +57,8 @@ pipeline {
                     gem uninstall bundler
                     gem install bundler'''
               sh 'bundle install --path=gems --binstubs=bin'
-              sh '''GEM_PATH=gems BUNDLE_SYSTEM_BINDIR=bin bundle exec rake bundle:clean
-                    GEM_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake bundle:install_local'''
+              sh '''GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake bundle:clean
+                    GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake bundle:install_local'''
             }
           }
         }
@@ -75,7 +75,7 @@ pipeline {
         script {
           docker.image('ruby:2.6').inside(){
             dir("${BASE_DIR}"){
-              sh 'GEM_PATH=gems BUNDLE_SYSTEM_BINDIR=bin bundle exec rake test:unit_local'
+              sh 'GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake test:unit_local'
             }
           }
         }
@@ -96,7 +96,7 @@ pipeline {
          script {
           rubyImage() {
             dir("${BASE_DIR}"){
-              sh(label: 'Run Rest API test rake task', script: 'GEM_PATH=gems BUNDLE_SYSTEM_BINDIR=bin bundle exec rake test:rest_api_local')
+              sh(label: 'Run Rest API test rake task', script: 'GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake test:rest_api_local')
             }
           }
          }
