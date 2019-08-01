@@ -57,8 +57,10 @@ pipeline {
                     gem uninstall bundler
                     gem install bundler'''
               sh 'bundle install --path=gems --binstubs=bin'
-              sh '''GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake bundle:clean
-                    GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake bundle:install_local'''
+              sh(label: 'check executables', script: 'ls -al bin')
+              sh(label: 'check gems', script: 'ls -al gems')
+              sh '''bundle exec rake bundle:clean
+                    bundle exec rake bundle:install_local'''
             }
           }
         }
