@@ -98,7 +98,9 @@ pipeline {
             dir("${BASE_DIR}"){
               sh '''gem update --system
                     gem uninstall bundler
-                    gem install bundler'''
+                    gem install bundler
+                    bundle exec rake bundle:clean
+                    rake bundle:install'''
               sh 'bundle install'
               sh(label: 'Run Rest API test rake task', script: 'bundle exec rake test:rest_api')
             }
