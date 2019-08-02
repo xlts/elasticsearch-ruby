@@ -61,7 +61,8 @@ pipeline {
               sh(label: 'check executables', script: 'ls -Rl bin')
               sh(label: 'check gems', script: 'ls -Rl gems')
               sh 'bundle exec rake bundle:clean'
-              sh 'bundle config'
+              sh 'bundler config bin_path'
+              sh 'bundler config path'
               sh 'bundle exec rake bundle:install_local'
             }
           }

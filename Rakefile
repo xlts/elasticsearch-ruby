@@ -85,7 +85,9 @@ namespace :bundle do
     #sh 'mkdir gems && chmod +w gems'
     SUBPROJECTS.each do |project|
       puts '-' * 80
-      sh "cd #{CURRENT_PATH.join(project)} && bundle install --path=#{CURRENT_PATH.join(project)}/gems"
+      sh "cd #{CURRENT_PATH.join(project)}"
+      sh 'bundler config'
+      sh "BUNDLE_GEMFILE=#{CURRENT_PATH.join(project)}/Gemfile bundle install --path=#{CURRENT_PATH.join(project)}/gems"
       puts
     end
   end
