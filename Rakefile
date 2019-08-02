@@ -88,6 +88,7 @@ namespace :bundle do
       sh "cd #{CURRENT_PATH.join(project)}"
       sh 'bundler config'
       sh "BUNDLE_GEMFILE=#{CURRENT_PATH.join(project)}/Gemfile bundle install --path=#{CURRENT_PATH.join(project)}/gems"
+      sh "cat Gemfile.lock"
       puts
     end
   end
