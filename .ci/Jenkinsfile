@@ -54,7 +54,6 @@ pipeline {
             dir("${BASE_DIR}"){
               sh 'git --version'
               sh '''gem update --system
-                    gem uninstall bundler
                     gem install bundler'''
               sh 'bundle install --path=gems --binstubs=bin'
               sh 'pwd'
