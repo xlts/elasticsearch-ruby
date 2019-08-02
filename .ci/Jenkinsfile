@@ -60,10 +60,8 @@ pipeline {
               sh 'pwd'
               sh(label: 'check executables', script: 'ls -Rl bin')
               sh(label: 'check gems', script: 'ls -Rl gems')
-              sh 'bundle exec rake bundle:clean'
-              sh 'bundler config bin_path'
-              sh 'bundler config path'
-              sh 'bundle exec rake bundle:install_local'
+              sh 'bin/rake bundle:clean'
+              sh 'bin/rake bundle:install_local'
             }
           }
         }
@@ -80,7 +78,7 @@ pipeline {
         script {
           docker.image('ruby:2.6').inside(){
             dir("${BASE_DIR}"){
-              sh 'GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake test:unit_local'
+              sh 'bin/rake test:unit_local'
             }
           }
         }
