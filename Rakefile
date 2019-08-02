@@ -8,12 +8,13 @@ import 'profile/benchmarking/benchmarking_tasks.rake'
 require 'pathname'
 
 CURRENT_PATH = Pathname( File.expand_path('..', __FILE__) )
-SUBPROJECTS = [ 'elasticsearch',
-                'elasticsearch-transport',
-                'elasticsearch-dsl',
-                'elasticsearch-api',
-                'elasticsearch-extensions',
-                'elasticsearch-xpack' ].freeze
+# SUBPROJECTS = [ 'elasticsearch',
+#                 'elasticsearch-transport',
+#                 'elasticsearch-dsl',
+#                 'elasticsearch-api',
+#                 'elasticsearch-extensions',
+#                 'elasticsearch-xpack' ].freeze
+SUBPROJECTS = ['elasticsearch']
 
 RELEASE_TOGETHER = [ 'elasticsearch',
                      'elasticsearch-transport',
@@ -85,9 +86,7 @@ namespace :bundle do
     #sh 'mkdir gems && chmod +w gems'
     SUBPROJECTS.each do |project|
       puts '-' * 80
-      sh "cd #{CURRENT_PATH.join(project)}"
-      sh 'bundler config'
-      sh "BUNDLE_GEMFILE=#{CURRENT_PATH.join(project)}/Gemfile bundle install --path=#{CURRENT_PATH.join(project)}/gems"
+      sh "cd #{CURRENT_PATH.join(project)} && unset BUNDLE_GEMFILE && bundle install --path=#{CURRENT_PATH.join(project)}/gems --binstubs=#{CURRENT_PATH.join(project)}/bin"
       sh "cat Gemfile.lock"
       puts
     end
