@@ -87,7 +87,7 @@ namespace :bundle do
     SUBPROJECTS.each do |project|
       puts '-' * 80
       sh "cd #{CURRENT_PATH.join(project)} && unset BUNDLE_GEMFILE && gem list bundler"
-      sh "cd #{CURRENT_PATH.join(project)} && unset BUNDLE_GEMFILE && bundle install --path=#{CURRENT_PATH.join(project)}/gems --binstubs=#{CURRENT_PATH.join(project)}/bin"
+      sh "cd #{CURRENT_PATH.join(project)} && unset BUNDLE_GEMFILE && unset BUNDLER_VERSION && bundle install --path=#{CURRENT_PATH.join(project)}/gems --binstubs=#{CURRENT_PATH.join(project)}/bin"
       sh "cat Gemfile.lock"
       puts
     end
