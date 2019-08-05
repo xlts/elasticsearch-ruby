@@ -89,6 +89,7 @@ pipeline {
        }
        steps {
          deleteDir()
+         unstash 'source-dependencies'
          dir("${BASE_DIR}"){
            sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
          }
