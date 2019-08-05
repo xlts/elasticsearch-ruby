@@ -43,40 +43,45 @@ pipeline {
       }
     }
 
-    stage('Install dependencies') {
-      options { skipDefaultCheckout() }
-      steps {
-        deleteDir()
-        // Acceses the stash
-        unstash 'source'
-        script {
-          docker.image('ruby:2.6').inside(){
-            dir("${BASE_DIR}"){
-              sh 'git --version'
-              sh '''gem update --system
-                    gem install bundler'''
-              sh 'bundle install --path=gems --binstubs=bin'
-              sh 'pwd'
-              sh(label: 'check executables', script: 'ls -Rl bin')
-              sh(label: 'check gems', script: 'ls -Rl gems')
-              sh 'bin/rake bundle:clean'
-              sh 'bin/rake bundle:install_local'
-            }
-          }
-        }
-        // Stashes dependencies
-        stash allowEmpty: true, name: 'source-dependencies', useDefaultExcludes: false
-      }
-    }
+//    stage('Install dependencies') {
+//      options { skipDefaultCheckout() }
+//      steps {
+//        deleteDir()
+//        // Acceses the stash
+//        unstash 'source'
+//        script {
+//          docker.image('ruby:2.6').inside(){
+//            dir("${BASE_DIR}"){
+//              sh 'git --version'
+//              sh '''gem update --system
+//                    gem install bundler'''
+//              sh 'bundle install --path=gems --binstubs=bin'
+//              sh 'pwd'
+//              sh(label: 'check executables', script: 'ls -Rl bin')
+//              sh(label: 'check gems', script: 'ls -Rl gems')
+//              sh 'bin/rake bundle:clean'
+//              sh 'bin/rake bundle:install_local'
+//            }
+//          }
+//        }
+//        // Stashes dependencies
+//        stash allowEmpty: true, name: 'source-dependencies', useDefaultExcludes: false
+//      }
+//    }
 
     stage('Unit test') {
       options { skipDefaultCheckout() }
       steps {
         deleteDir()
         unstash 'source-dependencies'
-        script {
           docker.image('ruby:2.6').inside(){
             dir("${BASE_DIR}"){
+              sh '''gem update --system
+                    gem uninstall bundler
+                    gem install bundler
+                    bundle install
+                    bundle exec rake bundle:clean
+                    rake bundle:install'''
               sh 'bin/rake test:unit_local'
             }
           }
@@ -84,28 +89,28 @@ pipeline {
       }
     }
 
-    stage('OSS integration test') {
-      options { skipDefaultCheckout() }
-      environment {
-        TEST_ES_SERVER = 'http://elasticsearch:9200'
-      }
-      steps {
-        deleteDir()
-        unstash 'source-dependencies'
-        dir("${BASE_DIR}"){
-          sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
-        }
-         script {
-          rubyImage() {
-            dir("${BASE_DIR}"){
-              sh(label: 'Run Rest API test rake task', script: 'GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake test:rest_api_local')
-            }
-          }
-         }
-        sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
-      }
-    }
-
+    //stage('OSS integration test') {
+    //  options { skipDefaultCheckout() }
+    //  environment {
+    //    TEST_ES_SERVER = 'http://elasticsearch:9200'
+    //  }
+    //  steps {
+    //    deleteDir()
+    //    unstash 'source-dependencies'
+    //    dir("${BASE_DIR}"){
+    //      sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
+    //    }
+    //     script {
+    //      rubyImage() {
+    //        dir("${BASE_DIR}"){
+    //          sh(label: 'Run Rest API test rake task', script: 'GEM_PATH=gems BUNDLE_PATH=gems BUNDLE_SYSTEM_BINDIR=bin rake test:rest_api_local')
+    //        }
+    //      }
+    //     }
+    //    sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
+    //  }
+    //}
+//
    // stage('xPack integration test') {
    //  options { skipDefaultCheckout() }
    //  environment {
