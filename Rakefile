@@ -8,13 +8,12 @@ import 'profile/benchmarking/benchmarking_tasks.rake'
 require 'pathname'
 
 CURRENT_PATH = Pathname( File.expand_path('..', __FILE__) )
-# SUBPROJECTS = [ 'elasticsearch',
-#                 'elasticsearch-transport',
-#                 'elasticsearch-dsl',
-#                 'elasticsearch-api',
-#                 'elasticsearch-extensions',
-#                 'elasticsearch-xpack' ].freeze
-SUBPROJECTS = ['elasticsearch']
+SUBPROJECTS = [ 'elasticsearch',
+                'elasticsearch-transport',
+                'elasticsearch-dsl',
+                'elasticsearch-api',
+                'elasticsearch-extensions',
+                'elasticsearch-xpack' ].freeze
 
 RELEASE_TOGETHER = [ 'elasticsearch',
                      'elasticsearch-transport',
@@ -64,7 +63,7 @@ task :subprojects do
     commit  = `git log --pretty=format:'%h %ar: %s' -1 #{project}`
     version =  Gem::Specification::load(CURRENT_PATH.join(project, "#{project}.gemspec").to_s).version.to_s
     puts "#{version}".ljust(10) +
-         "| \e[1m#{project.ljust(SUBPROJECTS.map {|s| s.length}.max)}\e[0m | #{commit[ 0..80]}..."
+             "| \e[1m#{project.ljust(SUBPROJECTS.map {|s| s.length}.max)}\e[0m | #{commit[ 0..80]}..."
   end
 end
 
@@ -77,17 +76,6 @@ namespace :bundle do
     SUBPROJECTS.each do |project|
       puts '-'*80
       sh "cd #{CURRENT_PATH.join(project)} && unset BUNDLE_GEMFILE && bundle install"
-      puts
-    end
-  end
-
-  desc "Run `bundle install` locally in all subprojects"
-  task :install_local do
-    #sh 'mkdir gems && chmod +w gems'
-    SUBPROJECTS.each do |project|
-      puts '-' * 80
-      sh "cd #{CURRENT_PATH.join(project)} && gem update --system && gem uninstall bundler && gem install bundler && unset BUNDLE_GEMFILE && bundle install --path=#{CURRENT_PATH.join(project)}/gems --binstubs=#{CURRENT_PATH.join(project)}/bin"
-      sh "cat Gemfile.lock"
       puts
     end
   end
@@ -179,36 +167,36 @@ task :update_version, :old, :new do |task, args|
   unless log_entries[:client].empty?
     changelog_update << "### Client\n\n"
     changelog_update << log_entries[:client]
-                          .map { |l| l.gsub /\[CLIENT\] /, '' }
-                          .map { |l| "#{l}" }
-                          .join("\n")
+                            .map { |l| l.gsub /\[CLIENT\] /, '' }
+                            .map { |l| "#{l}" }
+                            .join("\n")
     changelog_update << "\n\n"
   end
 
   unless log_entries[:api].empty?
     changelog_update << "### API\n\n"
     changelog_update << log_entries[:api]
-                          .map { |l| l.gsub /\[API\] /, '' }
-                          .map { |l| "#{l}" }
-                          .join("\n")
+                            .map { |l| l.gsub /\[API\] /, '' }
+                            .map { |l| "#{l}" }
+                            .join("\n")
     changelog_update << "\n\n"
   end
 
   unless log_entries[:dsl].empty?
     changelog_update << "### DSL\n\n"
     changelog_update << log_entries[:dsl]
-                          .map { |l| l.gsub /\[DSL\] /, '' }
-                          .map { |l| "#{l}" }
-                          .join("\n")
+                            .map { |l| l.gsub /\[DSL\] /, '' }
+                            .map { |l| "#{l}" }
+                            .join("\n")
     changelog_update << "\n\n"
   end
 
   unless log_entries[:client].empty?
     changelog_update << "### EXT:#{args[:new]}\n\n"
     changelog_update << log_entries[:ext]
-                          .map { |l| l.gsub /\[EXT\] /, '' }
-                          .map { |l| "#{l}" }
-                          .join("\n")
+                            .map { |l| l.gsub /\[EXT\] /, '' }
+                            .map { |l| "#{l}" }
+                            .join("\n")
     changelog_update << "\n\n"
   end
 
@@ -228,17 +216,17 @@ task :update_version, :old, :new do |task, args|
   diff = `git --no-pager diff --patch --word-diff=color --minimal elasticsearch*`.split("\n")
 
   puts diff
-          .reject { |l| l =~ /^\e\[1mdiff \-\-git/ }
-          .reject { |l| l =~ /^\e\[1mindex [a-z0-9]{7}/ }
-          .reject { |l| l =~ /^\e\[1m\-\-\- i/ }
-          .reject { |l| l =~ /^\e\[36m@@/ }
-          .map    { |l| l =~ /^\e\[1m\+\+\+ w/ ? "\n#{l}   " + '-'*(104-l.size) : l }
-          .join("\n")
+           .reject { |l| l =~ /^\e\[1mdiff \-\-git/ }
+           .reject { |l| l =~ /^\e\[1mindex [a-z0-9]{7}/ }
+           .reject { |l| l =~ /^\e\[1m\-\-\- i/ }
+           .reject { |l| l =~ /^\e\[36m@@/ }
+           .map    { |l| l =~ /^\e\[1m\+\+\+ w/ ? "\n#{l}   " + '-'*(104-l.size) : l }
+           .join("\n")
 
   puts "\n\n", "= COMMIT ".ansi(:faint) + ('='*91).ansi(:faint), "\n"
 
   puts  "git add CHANGELOG.md elasticsearch*",
         "git commit --verbose --message='Release #{args[:new]}' --edit",
         "rake release"
-        "\n"
+  "\n"
 end

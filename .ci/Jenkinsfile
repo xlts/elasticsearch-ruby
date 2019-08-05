@@ -82,6 +82,34 @@ pipeline {
     //  }
     //}
 
+     stage('Client tests') {
+       options { skipDefaultCheckout() }
+       environment {
+         TEST_ES_SERVER = 'http://elasticsearch:9200'
+       }
+       steps {
+         deleteDir()
+         dir("${BASE_DIR}"){
+           sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
+         }
+          script {
+           rubyImage() {
+             dir("${BASE_DIR}"){
+               sh '''gem update --system
+                     gem uninstall bundler
+                     gem install bundler
+                     bundle
+                     bundle exec rake bundle:clean
+                     rake bundle:install'''
+               sh 'bundle install'
+               sh(label: 'Run Rest API test rake task', script: 'bundle exec rake test:client')
+             }
+           }
+          }
+         sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
+       }
+     }
+
     stage('OSS integration test') {
       options { skipDefaultCheckout() }
       environment {
