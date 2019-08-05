@@ -105,9 +105,9 @@ pipeline {
       options { skipDefaultCheckout() }
       environment {
         TEST_ES_SERVER = 'elasticsearch:9200'
-        ELASTIC_PASSWORD=changeme'
-        ELASTIC_USER=elastic
-        TEST_SUITE=security
+        ELASTIC_PASSWORD='changeme'
+        ELASTIC_USER='elastic'
+        TEST_SUITE='security'
       }
       steps {
         deleteDir()
