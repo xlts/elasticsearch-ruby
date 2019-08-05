@@ -116,7 +116,6 @@ pipeline {
          script {
           rubyImage() {
             dir("${BASE_DIR}"){
-              sh 'curl -X GET http://elasticsearch:9200 -u elastic:changeme'
               sh '''gem update --system
                     gem uninstall bundler
                     gem install bundler
