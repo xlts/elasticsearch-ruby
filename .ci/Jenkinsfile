@@ -75,7 +75,7 @@ pipeline {
       steps {
         deleteDir()
         script {
-          docker.image('ruby:2.6').inside(){
+          rubyImage() {
             dir("${BASE_DIR}"){
               sh '''gem update --system
                     gem uninstall bundler
@@ -83,7 +83,7 @@ pipeline {
                     bundle install
                     bundle exec rake bundle:clean
                     rake bundle:install'''
-              sh 'bin/rake test:unit_local'
+              sh(label: 'Run Unit tests', script: 'bundle exec rake test:unit')
             }
           }
         }
