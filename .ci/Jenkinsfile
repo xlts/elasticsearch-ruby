@@ -43,82 +43,43 @@ pipeline {
       }
     }
 
-    stage('Install dependencies') {
-      options { skipDefaultCheckout() }
-      steps {
-        deleteDir()
-        // Acceses the stash
-        unstash 'source'
-        script {
-          docker.image('ruby:2.6').inside(){
-            dir("${BASE_DIR}"){
-              sh 'git --version'
-              sh '''gem update --system
-                    gem uninstall bundler
-                    gem install bundler'''
-              sh 'bundle install'
-              sh '''bundle exec rake bundle:clean
-                    rake bundle:install'''
-            }
-          }
-        }
-        // Stashes dependencies
-        stash allowEmpty: true, name: 'source-dependencies', useDefaultExcludes: false
-      }
-    }
-
-    //stage('Unit test') {
-    //  options { skipDefaultCheckout() }
-    //  steps {
-    //    deleteDir()
-    //    unstash 'source-dependencies'
-    //    script {
-    //      rubyImage() {
-    //        dir("${BASE_DIR}"){
-    //          sh 'bundle exec rake test:unit'
-    //        }
-    //      }
-    //    }
-    //  }
-    //}
-
-     stage('Client tests') {
-       options { skipDefaultCheckout() }
-       environment {
-         TEST_ES_SERVER = 'http://elasticsearch:9200'
-       }
-       steps {
-         deleteDir()
-         unstash 'source-dependencies'
-         dir("${BASE_DIR}"){
-           sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
-         }
-          script {
-           rubyImage() {
-             dir("${BASE_DIR}"){
-               sh '''gem update --system
-                     gem uninstall bundler
-                     gem install bundler
-                     bundle
-                     bundle exec rake bundle:clean
-                     rake bundle:install'''
-               sh 'bundle install'
-               sh(label: 'Run Rest API test rake task', script: 'bundle exec rake test:client')
-             }
-           }
-          }
-         sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
-       }
-     }
-
-    stage('OSS integration test') {
+    stage('Client tests') {
       options { skipDefaultCheckout() }
       environment {
         TEST_ES_SERVER = 'http://elasticsearch:9200'
       }
       steps {
         deleteDir()
-        unstash 'source-dependencies'
+        unstash 'source'
+        dir("${BASE_DIR}"){
+          sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
+        }
+         script {
+          rubyImage() {
+            dir("${BASE_DIR}"){
+              sh '''gem update --system
+                    gem uninstall bundler
+                    gem install bundler
+                    bundle
+                    bundle exec rake bundle:clean
+                    rake bundle:install'''
+              sh 'bundle install'
+              sh(label: 'Run Client rake task', script: 'bundle exec rake test:client')
+            }
+          }
+         }
+        sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
+      }
+    }
+
+    stage('OSS Rest API test') {
+      options { skipDefaultCheckout() }
+      environment {
+        TEST_ES_SERVER = 'http://elasticsearch:9200'
+      }
+      steps {
+        deleteDir()
+        unstash 'source'
         dir("${BASE_DIR}"){
           sh(label: 'Start Elasticsearch', script: './scripts/es-docker.sh --detach')
         }
@@ -140,30 +101,37 @@ pipeline {
       }
     }
 
-   // stage('xPack integration test') {
-   //  options { skipDefaultCheckout() }
-   //  environment {
-   //    TEST_ES_SERVER = 'elasticsearch:9200'
-   //    ELASTIC_PASSWORD=changeme'
-   //    ELASTIC_USER=elastic
-   //    TEST_SUITE=security
-   //  }
-   //  steps {
-   //    deleteDir()
-   //    unstash 'source-dependencies'
-   //    dir("${BASE_DIR}"){
-   //      sh(label: 'Start Elasticsearch', script: './scripts/es-docker-platinum.sh --detach')
-   //    }
-   //    //script {
-   //    //  rubyImage() {
-   //    //    dir("${BASE_DIR}"){
-   //    //      sh(label: 'Integration test', script: 'bundle exec rake test:security')
-   //    //    }
-   //    //  }
-   //    //}
-   //    sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
-   //  }
-   //}
+    stage('XPack Rest API test') {
+      options { skipDefaultCheckout() }
+      environment {
+        TEST_ES_SERVER = 'elasticsearch:9200'
+        ELASTIC_PASSWORD=changeme'
+        ELASTIC_USER=elastic
+        TEST_SUITE=security
+      }
+      steps {
+        deleteDir()
+        unstash 'source'
+        dir("${BASE_DIR}"){
+          sh(label: 'Start Elasticsearch', script: './scripts/es-docker-platinum.sh --detach')
+        }
+         script {
+          rubyImage() {
+            dir("${BASE_DIR}"){
+              sh '''gem update --system
+                    gem uninstall bundler
+                    gem install bundler
+                    bundle
+                    bundle exec rake bundle:clean
+                    rake bundle:install'''
+              sh 'bundle install'
+              sh(label: 'Run XPack Rest API test rake task', script: 'bundle exec rake test:security')
+            }
+          }
+         }
+        sh(label: 'Stop Elasticsearch', script: 'docker kill $(docker ps -q)')
+      }
+    }
   }
 }
 
